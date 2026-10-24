@@ -113,10 +113,10 @@ export function SidebarOrder({ host }: { host: SettingsPanelHost }) {
             disabled={!chosen} ref={trigger} onClick={toggleMenu}>
             {chosen
               ? <><Icon name={chosen[2] ?? ''} /><span data-sidebar-add-label="">{chosen[1]}</span><Icon name="chevron-down" /></>
-              : <><Icon name="check" /><span>全部页面都已显示</span></>}
+              : <><Icon name="check" /><span>모든 페이지가 표시되어 있습니다</span></>}
           </button>
           {available.length
-            ? <div className="popmenu" data-sidebar-add-menu="" role="listbox" aria-label="选择要添加的页面" hidden ref={menu}>
+            ? <div className="popmenu" data-sidebar-add-menu="" role="listbox" aria-label="추가할 페이지 선택" hidden ref={menu}>
                 {available.map(([key, label, glyph]) => (
                   <button type="button" role="option" key={optionKey(key)} data-sidebar-add-option={optionKey(key)}
                     aria-selected={chosen?.[0] === key} tabIndex={chosen?.[0] === key ? 0 : -1} onKeyDown={optionKeys}
