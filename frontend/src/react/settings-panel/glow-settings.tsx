@@ -1,13 +1,18 @@
-/* 侧栏光晕的详细设置，照 feralui.dev/gradients 的工作台面板来：参数行是「84px 标签 + 自绘拉条 +
- * 右侧等宽读数」，颜色行点开在自己下方弹一张色板。
- * 取证见 docs/reference-snapshots/feralui-studio-boardui-accent-measured.md。
+/* 사이드바 광원 효과 상세 설정: feralui.dev/gradients의 작업 패널을 참고했습니다.
+ * 매개변수 행은 '84px 라벨 + 사용자 정의 슬라이더 + 오른쪽 동일 폭 수치'로 구성됩니다.
+ * 색상 행을 누르면 바로 아래에 색상표가 펼쳐집니다.
+ * 참고 자료: docs/reference-snapshots/feralui-studio-boardui-accent-measured.md
  *
- * 预设色块在这一屏和侧栏底部那张配色卡上是同一组色块、同一份写入（`GlowPresetGrid`），两处读的都是
- * 壳那一份 store，点哪一边另一边当场对齐。当前档名、预设色块和五条参数同属「配色」这一组。
+ * 사전 설정 색상 타일은 이 화면과 사이드바 하단의 색상 카드에서 같은 항목과 저장값을 공유합니다.
+ * 두 곳 모두 앱 셸의 store를 사용하므로 한쪽에서 선택하면 다른 쪽에도 즉시 반영됩니다.
+ * 현재 사전 설정 이름, 색상 타일, 다섯 가지 매개변수는 모두 '색상' 그룹에 속합니다.
  *
- * 「玻璃原色」那一档没有三枚光晕：那一层整个算作 0，面上漂的是每块玻璃自带的两团反光。强度、
- * 颗粒、柔化、大小和三枚颜色于是全都管不着任何东西，这一档把它们收起来，换一句说明颜色由明暗
- * 主题给。漂移速度不收——自带那两团也在漂。「恢复默认」同样不收，任何一档下都要能一步回到出厂那一套。 */
+ * '기본 유리 색상' 사전 설정에는 세 개의 광원 효과가 없습니다. 해당 효과의 강도는 0으로 처리되며,
+ * 유리 자체에 있는 두 개의 반사광만 표시됩니다. 따라서 강도, 입자감, 부드러움, 크기, 세 가지 색상은
+ * 적용되지 않습니다. 이 사전 설정에서는 해당 항목을 숨기고 색상이 밝음/어두움 테마를 따른다고 안내합니다.
+ * 이동 속도는 유리 자체의 반사광에도 적용되므로 계속 표시합니다. '기본값 복원'도 모든 사전 설정에서
+ * 사용할 수 있어야 하므로 항상 표시합니다.
+ */
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { closeAnchoredMenu, wireAnchoredMenu } from '@peach/legacy/ui';
@@ -25,7 +30,7 @@ type Field = 'strength' | 'noise' | 'speed' | 'soften' | 'size';
 type Spot = 'spot1' | 'spot2' | 'spot3';
 
 const FIELDS: readonly [Field, string, number][] = [
-  ['strength', '强度', 100], ['noise', '颗粒', 60], ['speed', '漂移速度', 300], ['soften', '柔化', 100], ['size', '大小', 100],
+  ['strength', '강도', 100], ['noise', '입자감', 60], ['speed', '이동 속도', 300], ['soften', '부드러움', 100], ['size', '크기', 100],
 ];
 
 
@@ -35,8 +40,8 @@ function StopRow({ host, spot, index, glow }: { host: SettingsPanelHost; spot: S
   const toggle = useRef<HTMLButtonElement | null>(null);
   const pop = useRef<HTMLDivElement | null>(null);
   const [family, setFamily] = useState('all');
-  /* 弹层左右贴齐这一行：宽度不跟着行走的话，一张比行窄的色板看不出是从哪一行开出来的。
-     这条要排在 wireAnchoredMenu 之前，它按当前宽度算左缘。 */
+  /* 팝업을 해당 행의 좌우 폭에 맞춥니다. 행보다 좁으면 어느 행에서 열린 색상표인지 알아보기 어렵습니다.
+     이 처리는 wireAnchoredMenu보다 먼저 실행되어야 합니다. wireAnchoredMenu가 현재 폭을 기준으로 왼쪽 위치를 계산합니다. */
   useLayoutEffect(() => {
     const [mount, button, menu] = [row.current, toggle.current, pop.current];
     if (!mount || !button || !menu) return;
@@ -61,13 +66,13 @@ function StopRow({ host, spot, index, glow }: { host: SettingsPanelHost; spot: S
         <Icon name="chevron-down" />
       </button>
       <div className="popmenu" data-glow-stop-pop="" popover="manual" hidden ref={pop}>
-        <div data-glow-pills="" role="group" aria-label="色系">
+        <div data-glow-pills="" role="group" aria-label="색상 계열">
           {GLOW_SWATCH_FAMILIES.map(([key, name]) => (
             <button type="button" key={key} data-glow-pill={key} aria-pressed={key === family}
               onClick={() => setFamily(key)}>{name}</button>
           ))}
         </div>
-        <div data-glow-palette="" role="radiogroup" aria-label={`${label}颜色`}>
+        <div data-glow-palette="" role="radiogroup" aria-label={`${label} 색상`}>
           {GLOW_SWATCHES.map(([swatchFamily, name, hex]) => (
             <button type="button" key={hex} role="radio" aria-checked={hex === color} data-glow-swatch={hex}
               data-glow-family={swatchFamily} style={{ '--glow-swatch': hex } as CSSProperties}
@@ -84,14 +89,15 @@ export function GlowSettings({ host }: { host: SettingsPanelHost }) {
   const glow = host.store.value.homeGlow;
   const native = isNativeGlass(glow.preset);
   return (
-    <section data-glow-setting="" id="homeGlowControls" aria-label="侧栏光晕参数" hidden={!glow.on}>
-      <section data-glow-group=""><h4>配色</h4>
-        <p data-glow-current="">当前配色<b data-glow-preset-name="">{glowPresetName(glow.preset)}</b></p>
-        <GlowPresetGrid store={host.store} label="光晕配色" />
-        <p data-glow-native-note="" hidden={!native}>这一档用每块玻璃自带的反光，颜色跟着明暗主题走。</p>
+    <section data-glow-setting="" id="homeGlowControls" aria-label="사이드바 광원 효과 설정" hidden={!glow.on}>
+      <section data-glow-group=""><h4>색상</h4>
+        <p data-glow-current="">현재 색상 <b data-glow-preset-name="">{glowPresetName(glow.preset)}</b></p>
+        <GlowPresetGrid store={host.store} label="광원 효과 색상" />
+        <p data-glow-native-note="" hidden={!native}>이 사전 설정은 유리 자체의 반사광을 사용하며, 색상은 밝음/어두움 테마를 따릅니다.</p>
         <div data-glow-fields="">
-          {/* 拖动中只改参数、只排一帧重画；落盘留给松手那一下。其余玻璃面跟着走的只有速度，
-              而它那两枚变量只能写在根上，所以拖动期间只有侧栏那一层在变，松手才铺到整页。 */}
+          {/* 드래그 중에는 매개변수만 변경하고 한 프레임만 다시 그립니다. 저장은 마우스를 놓을 때 수행합니다.
+              다른 유리 표면에 영향을 주는 값은 이동 속도뿐이며, 관련 변수는 루트 요소에만 기록됩니다.
+              따라서 드래그 중에는 사이드바 효과만 바뀌고, 마우스를 놓으면 전체 페이지에 반영됩니다. */}
           {FIELDS.map(([field, label, max]) => (
             <DialRow key={field} field={field} label={label} max={max} value={glow[field]} hidden={native && field !== 'speed'}
               onStep={(value) => { host.store.value.homeGlow[field] = value; host.changed('glowFrame') }}
@@ -99,14 +105,14 @@ export function GlowSettings({ host }: { host: SettingsPanelHost }) {
           ))}
         </div>
       </section>
-      <section data-glow-group="" data-glow-colours="" hidden={native}><h4>颜色</h4>
+      <section data-glow-group="" data-glow-colours="" hidden={native}><h4>색상</h4>
         <div data-glow-stops="">
           {HOME_GLOW_SPOTS.map((spot, index) => <StopRow key={spot} host={host} spot={spot as Spot} index={index} glow={glow} />)}
         </div>
       </section>
       <div data-glow-actions="">
         <button type="button" className="geist-button" data-glow-reset=""
-          onClick={() => { host.store.value.homeGlow = normalizeHomeGlow(null); host.store.save(); host.changed('glow') }}>恢复默认</button>
+          onClick={() => { host.store.value.homeGlow = normalizeHomeGlow(null); host.store.save(); host.changed('glow') }}>기본값 복원</button>
       </div>
     </section>
   );
